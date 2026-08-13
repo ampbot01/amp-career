@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AMP Career Portal
 
-## Getting Started
+Job portal untuk [ampedmedia.id](https://ampedmedia.id) — kandidat lihat lowongan + apply, admin HR kelola jobs + review lamaran.
 
-First, run the development server:
+**Spec:** `docs/ideas/amp-career-portal.md` · **Plan:** `docs/superpowers/plans/2026-08-13-amp-career-portal.md`
+
+## Stack
+
+Next.js 16 (App Router) · Tailwind v4 (AMP design tokens, dark-first) · Prisma 7 + Supabase Postgres · Supabase Storage (private bucket, signed URLs) · auth.js v5 credentials · Cloudflare Turnstile · Vitest
+
+## Dev
 
 ```bash
+npm install
+cp .env.example .env   # isi credential
+npx prisma migrate dev
+npm run db:seed        # admin + sample jobs
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Public: `http://localhost:3000`
+- Admin: `http://localhost:3000/admin` (login pakai `ADMIN_EMAIL`/`ADMIN_PASSWORD` dari `.env` saat seed)
+- Test: `npm test`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy (Vercel)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Import repo ke Vercel, root directory = repo ini
+2. Set env vars (semua dari `.env.example`):
+   - `DATABASE_URL`, `DIRECT_URL` — pakai **pooler** (port 6543, `?pgbouncer=true`) untuk `DATABASE_URL` di serverless
+   - `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+   - `AUTH_SECRET` (generate baru untuk prod: `npx auth secret`), `AUTH_TRUST_HOST=true`
+   - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` — tambahkan domain `career.ampedmedia.id` di Cloudflare Turnstile site
+3. Migrasi: `npx prisma migrate deploy` (jalankan manual sekali, atau via CI step)
+4. Seed admin prod: set `ADMIN_PASSWORD` kuat, `npm run db:seed` dari lokal mengarah ke DB prod (atau buat user manual via SQL)
+5. DNS: `career.ampedmedia.id` → CNAME ke Vercel
 
-## Learn More
+## Catatan
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- File CV tidak pernah lewat server Vercel — upload langsung ke Supabase Storage via signed URL
+- Rate limit in-memory (reset per cold start) — upgrade ke Upstash kalau perlu konsistensi antar instance
+- Anti-spam bypass otomatis di dev (Turnstile secret kosong); di production wajib diset
