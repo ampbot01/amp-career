@@ -95,7 +95,7 @@ export default async function HomePage({
             </span>
           </Link>
 
-          {categories.map((c) => (
+          {categories.map((c: { category: string }) => (
             <Link
               key={c.category}
               href={`/?category=${encodeURIComponent(c.category)}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
@@ -136,7 +136,7 @@ export default async function HomePage({
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {jobs.map((job) => (
+                {jobs.map((job: any) => (
                   <JobCard key={job.id} {...job} applicantCount={job._count.applications} />
                 ))}
               </div>

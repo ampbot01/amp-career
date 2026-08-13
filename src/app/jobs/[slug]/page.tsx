@@ -47,7 +47,7 @@ export default async function JobDetailPage({
   // Helper formatting for multi-line requirements
   const reqList = job.requirements
     .split("\n")
-    .map((line) => line.trim())
+    .map((line: string) => line.trim())
     .filter(Boolean);
 
   return (
@@ -154,7 +154,7 @@ export default async function JobDetailPage({
 
               {reqList.length > 1 ? (
                 <ul className="space-y-3 text-sm text-neutral-300">
-                  {reqList.map((req, idx) => (
+                  {reqList.map((req: string, idx: number) => (
                     <li key={idx} className="flex items-start gap-3">
                       <div className="h-5 w-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5 text-emerald-400">
                         <CheckCircle2 className="h-3.5 w-3.5" />

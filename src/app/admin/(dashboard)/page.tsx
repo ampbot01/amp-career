@@ -140,7 +140,7 @@ export default async function AdminDashboard() {
                   </td>
                 </tr>
               ) : (
-                recent.map((a) => (
+                recent.map((a: any) => (
                   <tr key={a.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-4 py-3.5 font-bold text-white flex items-center gap-2.5">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 font-heading font-extrabold text-white text-xs shrink-0">

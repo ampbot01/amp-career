@@ -79,10 +79,9 @@ export async function POST(req: NextRequest) {
         data: { ...parsed.data, jobId, resumePath },
       });
       return NextResponse.json({ id: application.id }, { status: 201 });
-    } catch (e) {
+    } catch (e: any) {
       if (
-        e instanceof Prisma.PrismaClientKnownRequestError &&
-        e.code === "P2002" // unique constraint (email, jobId)
+        e?.code === "P2002" // unique constraint (email, jobId)
       ) {
         return NextResponse.json(
           { error: "Kamu sudah pernah melamar posisi ini dengan email tersebut." },

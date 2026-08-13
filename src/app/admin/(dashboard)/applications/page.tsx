@@ -108,7 +108,7 @@ export default async function AdminApplicationsPage({
             className="rounded-xl border border-white/10 bg-[#0a0a0a] px-3.5 py-2 text-xs text-white outline-none focus:border-amp-blue"
           >
             <option value="">Semua Posisi Lowongan</option>
-            {jobs.map((j) => (
+            {jobs.map((j: { id: string; title: string }) => (
               <option key={j.id} value={j.id}>
                 {j.title}
               </option>
@@ -154,7 +154,7 @@ export default async function AdminApplicationsPage({
                   </td>
                 </tr>
               ) : (
-                applications.map((a) => (
+                applications.map((a: any) => (
                   <tr key={a.id} className="hover:bg-white/[0.02] transition-colors">
                     {/* Pelamar */}
                     <td className="px-5 py-4 font-bold text-white">
