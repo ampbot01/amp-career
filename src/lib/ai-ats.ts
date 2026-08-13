@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { supabaseAdmin, RESUME_BUCKET } from "@/lib/supabase";
 
 async function requireAdmin() {
@@ -23,10 +22,13 @@ export type AiAnalysisData = {
 export async function runAiAtsAnalysis(applicationId: string) {
   await requireAdmin();
 
-  const app = await prisma.application.findUniqueOrThrow({
-    where: { id: applicationId },
-    include: { job: true },
-  });
+  const { data: app, error: appErr } = await supabaseAdmin
+    .from("Application")
+    .select("*, Job(*)")
+    .eq("id", applicationId)
+    .single();
+
+  if (appErr || !app) throw new Error("Application not found");
 
   const timeString = new Date().toLocaleTimeString("id-ID", {
     hour: "2-digit",
@@ -34,10 +36,13 @@ export async function runAiAtsAnalysis(applicationId: string) {
     second: "2-digit",
   });
 
+  const jobTitle = app.Job?.title ?? "Posisi Lowongan";
+  const jobRequirements = app.Job?.requirements ?? "";
+
   console.log(`\n======================================================`);
   console.log(`[AI ATS Engine] Running re-analysis for app ID: ${applicationId}`);
   console.log(`[AI ATS Engine] Pelamar: ${app.fullName} (${app.email})`);
-  console.log(`[AI ATS Engine] Posisi: ${app.job.title}`);
+  console.log(`[AI ATS Engine] Posisi: ${jobTitle}`);
 
   const openAiCompatibleKey =
     process.env.OPENAI_COMPATIBLE_API_KEY ||
@@ -88,11 +93,11 @@ export async function runAiAtsAnalysis(applicationId: string) {
 Analisis dengan cermat seluruh ISI DOKUMEN CV / RESUME PDF PELAMAR yang telah diekstrak berikut, beserta cover letter dan kualifikasi lowongan.
 
 PERSYARATAN LOWONGAN:
-Posisi: ${app.job.title}
-Kategori: ${app.job.category}
-Deskripsi: ${app.job.description}
+Posisi: ${app.Job?.title ?? "Posisi Lowongan"}
+Kategori: ${app.Job?.category ?? ""}
+Deskripsi: ${app.Job?.description ?? ""}
 Persyaratan Kualifikasi:
-${app.job.requirements}
+${app.Job?.requirements ?? ""}
 
 DATA PELAMAR:
 Nama: ${app.fullName}
@@ -159,14 +164,11 @@ Tolong berikan balasan dalam format JSON MURNI tanpa markdown:
           parsed.updatedAt = timeString;
           const jsonString = JSON.stringify(parsed);
 
-          await prisma.application.update({
-            where: { id: applicationId },
-            data: {
-              aiScore: parsed.score,
-              aiSummary: `[DeepSeek PDF AI - ${timeString}] ${parsed.badge} (${parsed.score}%) — ${parsed.summary}`,
-              aiAnalysis: jsonString,
-            },
-          });
+          await supabaseAdmin.from("Application").update({
+            aiScore: parsed.score,
+            aiSummary: `[DeepSeek PDF AI - ${timeString}] ${parsed.badge} (${parsed.score}%) — ${parsed.summary}`,
+            aiAnalysis: jsonString,
+          }).eq("id", applicationId);
 
           console.log(`[AI ATS Engine] ✅ DeepSeek Success! Score: ${parsed.score}%`);
           console.log(`======================================================\n`);
@@ -217,14 +219,11 @@ Tolong berikan balasan dalam format JSON MURNI tanpa markdown:
           parsed.updatedAt = timeString;
           const jsonString = JSON.stringify(parsed);
 
-          await prisma.application.update({
-            where: { id: applicationId },
-            data: {
-              aiScore: parsed.score,
-              aiSummary: `[Gemini PDF AI - ${timeString}] ${parsed.badge} (${parsed.score}%) — ${parsed.summary}`,
-              aiAnalysis: jsonString,
-            },
-          });
+          await supabaseAdmin.from("Application").update({
+            aiScore: parsed.score,
+            aiSummary: `[Gemini PDF AI - ${timeString}] ${parsed.badge} (${parsed.score}%) — ${parsed.summary}`,
+            aiAnalysis: jsonString,
+          }).eq("id", applicationId);
 
           console.log(`[AI ATS Engine] ✅ Gemini Success! Score: ${parsed.score}%`);
           console.log(`======================================================\n`);
@@ -303,7 +302,7 @@ Tolong berikan balasan dalam format JSON MURNI tanpa markdown:
   const analysisResult: AiAnalysisData = {
     score,
     badge,
-    summary: `Hasil analisis ATS (pembacaan berkas PDF) menunjukkan tingkat kesesuaian kualifikasi ${score}% untuk posisi ${app.job.title}. (Diperbarui pkl ${timeString})`,
+    summary: `Hasil analisis ATS (pembacaan berkas PDF) menunjukkan tingkat kesesuaian kualifikasi ${score}% untuk posisi ${jobTitle}. (Diperbarui pkl ${timeString})`,
     strengths,
     gaps,
     recommendation,
@@ -312,14 +311,11 @@ Tolong berikan balasan dalam format JSON MURNI tanpa markdown:
 
   const jsonString = JSON.stringify(analysisResult);
 
-  await prisma.application.update({
-    where: { id: applicationId },
-    data: {
-      aiScore: score,
-      aiSummary: `[Smart Heuristic Engine - ${timeString}] ${badge} (${score}%) — ${analysisResult.summary}`,
-      aiAnalysis: jsonString,
-    },
-  });
+  await supabaseAdmin.from("Application").update({
+    aiScore: score,
+    aiSummary: `[Smart Heuristic Engine - ${timeString}] ${badge} (${score}%) — ${analysisResult.summary}`,
+    aiAnalysis: jsonString,
+  }).eq("id", applicationId);
 
   console.log(`[AI ATS Engine] ✅ Smart Heuristic Success! Score: ${score}% (Diperbarui pkl ${timeString})`);
   console.log(`======================================================\n`);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase";
 import { toggleJobOpen } from "@/lib/admin-actions";
 import { Plus, Briefcase, Edit, Eye, Sparkles, CheckCircle2, XCircle } from "lucide-react";
 
@@ -13,10 +13,20 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 export default async function AdminJobsPage() {
-  const jobs = await prisma.job.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { _count: { select: { applications: true } } },
+  const [jobsRes, appsRes] = await Promise.all([
+    supabaseAdmin.from("Job").select("*").order("createdAt", { ascending: false }),
+    supabaseAdmin.from("Application").select("id, jobId"),
+  ]);
+
+  const appCounts: Record<string, number> = {};
+  (appsRes.data || []).forEach((a: any) => {
+    appCounts[a.jobId] = (appCounts[a.jobId] || 0) + 1;
   });
+
+  const jobs = (jobsRes.data || []).map((j: any) => ({
+    ...j,
+    _count: { applications: appCounts[j.id] || 0 },
+  }));
 
   return (
     <div suppressHydrationWarning className="space-y-6">

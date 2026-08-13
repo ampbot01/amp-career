@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { supabaseAdmin, RESUME_BUCKET } from "@/lib/supabase";
 import { applicationSchema } from "@/lib/validation";
 import { verifyRecaptcha } from "@/lib/recaptcha";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { RateLimiter } from "@/lib/rate-limit";
-import { Prisma } from "@prisma/client";
 
 const limiter = new RateLimiter({ limit: 5, windowMs: 60 * 60 * 1000 }); // 5/IP/jam
 const RESUME_PATH_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.pdf$/;
@@ -68,28 +66,45 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Resume tidak ditemukan, upload ulang" }, { status: 400 });
     }
 
-    const job = await prisma.job.findUnique({ where: { id: jobId } });
+    const { data: job } = await supabaseAdmin
+      .from("Job")
+      .select("id, isOpen")
+      .eq("id", jobId)
+      .maybeSingle();
+
     if (!job) return NextResponse.json({ error: "Lowongan tidak ditemukan" }, { status: 404 });
     if (!job.isOpen) {
       return NextResponse.json({ error: "Lowongan sudah ditutup" }, { status: 410 });
     }
 
-    try {
-      const application = await prisma.application.create({
-        data: { ...parsed.data, jobId, resumePath },
-      });
-      return NextResponse.json({ id: application.id }, { status: 201 });
-    } catch (e: any) {
-      if (
-        e?.code === "P2002" // unique constraint (email, jobId)
-      ) {
-        return NextResponse.json(
-          { error: "Kamu sudah pernah melamar posisi ini dengan email tersebut." },
-          { status: 409 }
-        );
-      }
-      throw e;
+    // Cek duplicate application (email + jobId)
+    const { data: existingApp } = await supabaseAdmin
+      .from("Application")
+      .select("id")
+      .eq("jobId", jobId)
+      .eq("email", parsed.data.email)
+      .maybeSingle();
+
+    if (existingApp) {
+      return NextResponse.json(
+        { error: "Kamu sudah pernah melamar posisi ini dengan email tersebut." },
+        { status: 409 }
+      );
     }
+
+    const id = `app_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const { data: newApp, error: insertError } = await supabaseAdmin
+      .from("Application")
+      .insert([{ id, ...parsed.data, jobId, resumePath, status: "new" }])
+      .select("id")
+      .single();
+
+    if (insertError) {
+      console.error("Application Insert Error:", insertError);
+      return NextResponse.json({ error: "Gagal menyimpan lamaran" }, { status: 500 });
+    }
+
+    return NextResponse.json({ id: newApp.id }, { status: 201 });
   } catch (error) {
     console.error("API /api/applications Exception:", error);
     return NextResponse.json(

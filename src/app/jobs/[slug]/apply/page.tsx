@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { getJobBySlug } from "@/lib/data";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ApplyForm } from "@/components/apply-form";
@@ -14,7 +14,7 @@ export default async function ApplyPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const job = await prisma.job.findUnique({ where: { slug } });
+  const job = await getJobBySlug(slug);
   if (!job || !job.isOpen) notFound();
 
   return (

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase";
 import {
   Briefcase,
   Users,
@@ -16,16 +16,20 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const [openJobs, totalApps, newApps, recent] = await Promise.all([
-    prisma.job.count({ where: { isOpen: true } }),
-    prisma.application.count(),
-    prisma.application.count({ where: { status: "new" } }),
-    prisma.application.findMany({
-      take: 6,
-      orderBy: { createdAt: "desc" },
-      include: { job: { select: { title: true, category: true } } },
-    }),
+  const [openJobsRes, totalAppsRes, newAppsRes, recentRes] = await Promise.all([
+    supabaseAdmin.from("Job").select("id", { count: "exact", head: true }).eq("isOpen", true),
+    supabaseAdmin.from("Application").select("id", { count: "exact", head: true }),
+    supabaseAdmin.from("Application").select("id", { count: "exact", head: true }).eq("status", "new"),
+    supabaseAdmin.from("Application").select("*, Job(title, category)").order("createdAt", { ascending: false }).limit(6),
   ]);
+
+  const openJobs = openJobsRes.count || 0;
+  const totalApps = totalAppsRes.count || 0;
+  const newApps = newAppsRes.count || 0;
+  const recent = (recentRes.data || []).map((a: any) => ({
+    ...a,
+    job: a.Job,
+  }));
 
   return (
     <div suppressHydrationWarning className="space-y-8">

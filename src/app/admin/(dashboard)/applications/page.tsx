@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase";
 import { markReviewed, viewResume } from "@/lib/admin-actions";
 import { StatusBadge } from "@/app/admin/(dashboard)/page";
 import { AdminWaActions } from "@/components/admin-wa-actions";
@@ -49,21 +49,26 @@ export default async function AdminApplicationsPage({
   const { job: jobId, status, page } = await searchParams;
   const currentPage = Math.max(1, parseInt(page ?? "1", 10) || 1);
 
-  const where: any = {};
-  if (jobId) where.jobId = jobId;
-  if (status) where.status = status;
+  let query = supabaseAdmin
+    .from("Application")
+    .select("*, Job(title, category, requirements)", { count: "exact" })
+    .order("createdAt", { ascending: false })
+    .range((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE - 1);
 
-  const [applications, total, jobs] = await Promise.all([
-    prisma.application.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (currentPage - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-      include: { job: { select: { title: true, category: true, requirements: true } } },
-    }),
-    prisma.application.count({ where }),
-    prisma.job.findMany({ select: { id: true, title: true }, orderBy: { title: "asc" } }),
+  if (jobId) query = query.eq("jobId", jobId);
+  if (status) query = query.eq("status", status);
+
+  const [appsRes, jobsRes] = await Promise.all([
+    query,
+    supabaseAdmin.from("Job").select("id, title").order("title", { ascending: true }),
   ]);
+
+  const applications = (appsRes.data || []).map((a: any) => ({
+    ...a,
+    job: a.Job,
+  }));
+  const total = appsRes.count || 0;
+  const jobs = jobsRes.data || [];
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageUrl = (p: number) => {

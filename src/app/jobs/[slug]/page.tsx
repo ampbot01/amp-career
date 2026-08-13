@@ -103,7 +103,7 @@ export default async function JobDetailPage({
                 <div className="h-3 w-[1px] bg-white/10" />
                 <div className="flex items-center gap-1.5 font-semibold text-purple-300">
                   <Users className="h-4 w-4 text-purple-400" />
-                  <span>{job._count.applications} Pelamar</span>
+                  <span>{job._count?.applications ?? 0} Pelamar</span>
                 </div>
                 <div className="h-3 w-[1px] bg-white/10" />
                 <div className="flex items-center gap-1.5 text-neutral-400">

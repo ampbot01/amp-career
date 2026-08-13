@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase";
 import { JobForm } from "@/components/admin/job-form";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export default async function EditJobPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const job = await prisma.job.findUnique({ where: { id } });
+  const { data: job } = await supabaseAdmin.from("Job").select("*").eq("id", id).maybeSingle();
   if (!job) notFound();
 
   return (

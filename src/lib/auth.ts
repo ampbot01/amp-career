@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import argon2 from "argon2";
-import { prisma } from "./db";
+import { supabaseAdmin } from "./supabase";
 import { authConfig } from "./auth.config";
 
 // Auth penuh — hanya diimpor dari server components / route handlers (Node runtime).
@@ -18,7 +18,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials?.password as string | undefined;
         if (!email || !password) return null;
 
-        const user = await prisma.user.findUnique({ where: { email } });
+        const { data: user } = await supabaseAdmin
+          .from("User")
+          .select("*")
+          .eq("email", email)
+          .maybeSingle();
+
         if (!user) return null;
 
         const valid = await argon2.verify(user.passwordHash, password);
