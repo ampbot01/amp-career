@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { getJobBySlug } from "@/lib/data";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import {
@@ -34,19 +34,7 @@ export default async function JobDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  let job: any = null;
-  try {
-    job = await prisma.job.findUnique({
-      where: { slug },
-      include: {
-        _count: {
-          select: { applications: true },
-        },
-      },
-    });
-  } catch (err) {
-    console.error("JobDetailPage DB Query Error:", err);
-  }
+  const job = await getJobBySlug(slug);
 
   if (!job || !job.isOpen) notFound();
 

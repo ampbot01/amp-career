@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { getOpenJobs } from "@/lib/data";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Hero } from "@/components/hero";
@@ -14,46 +14,7 @@ export default async function HomePage({
   searchParams: Promise<{ category?: string; q?: string }>;
 }) {
   const { category, q } = await searchParams;
-
-  const whereClause: any = { isOpen: true };
-  if (category) {
-    whereClause.category = category;
-  }
-  if (q) {
-    whereClause.OR = [
-      { title: { contains: q, mode: "insensitive" } },
-      { description: { contains: q, mode: "insensitive" } },
-    ];
-  }
-
-  let jobs: any[] = [];
-  let categories: { category: string }[] = [];
-  let totalJobsCount = 0;
-
-  try {
-    const res = await Promise.all([
-      prisma.job.findMany({
-        where: whereClause,
-        orderBy: { createdAt: "desc" },
-        include: {
-          _count: {
-            select: { applications: true },
-          },
-        },
-      }),
-      prisma.job.findMany({
-        where: { isOpen: true },
-        select: { category: true },
-        distinct: ["category"],
-      }),
-      prisma.job.count({ where: { isOpen: true } }),
-    ]);
-    jobs = res[0];
-    categories = res[1];
-    totalJobsCount = res[2];
-  } catch (err) {
-    console.error("HomePage DB Query Error:", err);
-  }
+  const { jobs, categories, totalJobsCount } = await getOpenJobs(category, q);
 
   return (
     <div suppressHydrationWarning className="flex min-h-screen flex-col bg-[#030303]">
