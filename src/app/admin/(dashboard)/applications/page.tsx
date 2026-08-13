@@ -244,7 +244,7 @@ export default async function AdminApplicationsPage({
 
                     {/* Tanggal */}
                     <td className="px-5 py-4 text-neutral-400 text-[11px]">
-                      {a.createdAt.toLocaleDateString("id-ID", {
+                      {new Date(a.createdAt).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",

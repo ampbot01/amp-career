@@ -157,7 +157,7 @@ export default async function AdminDashboard() {
                       <div className="text-[10px] text-neutral-500">{a.phone}</div>
                     </td>
                     <td className="px-4 py-3.5 text-neutral-400">
-                      {a.createdAt.toLocaleDateString("id-ID", {
+                      {new Date(a.createdAt).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",

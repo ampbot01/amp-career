@@ -108,7 +108,7 @@ export default async function JobDetailPage({
                 <div className="h-3 w-[1px] bg-white/10" />
                 <div className="flex items-center gap-1.5 text-neutral-400">
                   <Calendar className="h-4 w-4 text-neutral-500" />
-                  <span suppressHydrationWarning>Diposting {job.createdAt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <span suppressHydrationWarning>Diposting {new Date(job.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
                 </div>
               </div>
             </div>
