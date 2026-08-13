@@ -21,18 +21,23 @@ model Job {
 }
 
 model Application {
-  id           String   @id @default(cuid())
-  jobId        String
-  job          Job      @relation(fields: [jobId], references: [id])
-  fullName     String
-  email        String
-  phone        String
-  resumePath   String // Supabase Storage object path
-  portfolioUrl String?
-  coverLetter  String?
-  source       String?
-  status       String   @default("new") // new | reviewed
-  createdAt    DateTime @default(now())
+  id             String   @id @default(cuid())
+  jobId          String
+  job            Job      @relation(fields: [jobId], references: [id])
+  fullName       String
+  email          String
+  phone          String
+  currentSalary  String?
+  expectedSalary String?
+  resumePath     String // Supabase Storage object path
+  portfolioUrl   String?
+  coverLetter    String?
+  source         String?
+  status         String   @default("new") // new | interview | offering | accepted | rejected
+  aiScore        Int?
+  aiSummary      String?
+  aiAnalysis     String?  @db.Text
+  createdAt      DateTime @default(now())
 
   @@unique([email, jobId])
 }

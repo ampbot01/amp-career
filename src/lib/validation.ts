@@ -1,10 +1,12 @@
 import { z } from "zod";
 
 export const applicationSchema = z.object({
-  fullName: z.string().min(2).max(100),
-  email: z.string().email().max(254),
-  phone: z.string().min(8).max(20),
-  portfolioUrl: z.union([z.literal(""), z.string().url()]).optional(),
+  fullName: z.string().min(2, "Nama lengkap minimal 2 karakter").max(100),
+  email: z.string().email("Format email tidak valid").max(254),
+  phone: z.string().min(8, "Nomor HP/WhatsApp minimal 8 digit").max(20),
+  currentSalary: z.string().min(1, "Gaji saat ini wajib diisi").max(100),
+  expectedSalary: z.string().min(1, "Ekspektasi gaji wajib diisi").max(100),
+  portfolioUrl: z.union([z.literal(""), z.string().url("Format URL portfolio tidak valid")]).optional(),
   coverLetter: z.string().max(5000).optional(),
   source: z.string().max(100).optional(),
 });
