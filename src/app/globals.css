@@ -11,9 +11,14 @@
   --color-muted-foreground: var(--muted-foreground);
 
   --color-amp-blue: #2266f1;
-  --color-amp-blue-light: #3b82f6;
+  --color-amp-blue-hover: #2563eb;
   --color-amp-blue-deep: #1d4ed8;
+  --color-amp-blue-light: #3b82f6;
+  --color-amp-blue-soft: #60a5fa;
   --color-amp-purple: #8350e8;
+  --color-amp-card: #0a0a0a;
+  --color-amp-bg: #030303;
+  --color-amp-surface: #111111;
 
   --font-heading: var(--font-space-grotesk), sans-serif;
   --font-body: var(--font-inter), sans-serif;
@@ -25,52 +30,154 @@
   --border: #262626;
   --foreground: #fafafa;
   --muted-foreground: #a3a3a3;
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-space-grotesk), sans-serif;
+  letter-spacing: -0.02em;
 }
 
-/* Effects from design.md */
+/* AMP Glow & Background Effects from design.md */
 .bg-hero-glow {
-  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34, 102, 241, 0.18), transparent 55%);
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34, 102, 241, 0.22), transparent 60%);
+}
+
+.bg-purple-glow {
+  background: radial-gradient(circle at bottom center, rgba(131, 80, 232, 0.15), transparent 70%);
 }
 
 .bg-btn-gradient {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
 }
 
+.bg-btn-gradient:hover {
+  box-shadow: 0 0 25px rgba(34, 102, 241, 0.45);
+}
+
 .bg-grid-pattern {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 
-.glass {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Dynamic Animated Gradient Text (AMP Live Web style) */
+.animate-gradient-text {
+  background-image: linear-gradient(
+    90deg,
+    #60a5fa 0%,
+    #3b82f6 25%,
+    #a855f7 50%,
+    #3b82f6 75%,
+    #60a5fa 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: textGradientShift 4s linear infinite;
 }
 
-/* Muted scrollbar */
+@keyframes textGradientShift {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Floating Ambient Orbs */
+@keyframes floatOrb1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(25px, -20px) scale(1.1); }
+}
+
+@keyframes floatOrb2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-30px, 25px) scale(1.15); }
+}
+
+.animate-float-orb-1 {
+  animation: floatOrb1 10s ease-in-out infinite;
+}
+
+.animate-float-orb-2 {
+  animation: floatOrb2 12s ease-in-out infinite;
+}
+
+/* Border Light Beam Sweep */
+@keyframes borderBeam {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-border-beam {
+  animation: borderBeam 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Glassmorphism & Surface Styles */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.glass-panel {
+  background: rgba(10, 10, 10, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Pulsing Status Dot */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Subtle Shimmer for interactive components */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}
+
+/* Muted custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #080808;
 }
 ::-webkit-scrollbar-thumb {
   background: #222;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #333;
 }
+
+
