@@ -92,6 +92,24 @@ export async function markReviewed(applicationId: string) {
     data: { status: "reviewed" },
   });
   revalidatePath("/admin/applications");
+  revalidatePath("/admin");
+}
+
+export async function updateApplicationStatus(applicationId: string, status: string) {
+  await requireAdmin();
+  await prisma.application.update({
+    where: { id: applicationId },
+    data: { status },
+  });
+  revalidatePath("/admin/applications");
+  revalidatePath("/admin");
+}
+
+export async function getResumeUrl(applicationId: string) {
+  await requireAdmin();
+  const app = await prisma.application.findUniqueOrThrow({ where: { id: applicationId } });
+  const url = await getResumeDownloadUrl(app.resumePath);
+  return url;
 }
 
 export async function viewResume(applicationId: string) {
