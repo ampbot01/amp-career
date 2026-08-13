@@ -34,14 +34,20 @@ export default async function JobDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const job = await prisma.job.findUnique({
-    where: { slug },
-    include: {
-      _count: {
-        select: { applications: true },
+  let job: any = null;
+  try {
+    job = await prisma.job.findUnique({
+      where: { slug },
+      include: {
+        _count: {
+          select: { applications: true },
+        },
       },
-    },
-  });
+    });
+  } catch (err) {
+    console.error("JobDetailPage DB Query Error:", err);
+  }
+
   if (!job || !job.isOpen) notFound();
 
   // Helper formatting for multi-line requirements

@@ -26,23 +26,34 @@ export default async function HomePage({
     ];
   }
 
-  const [jobs, categories, totalJobsCount] = await Promise.all([
-    prisma.job.findMany({
-      where: whereClause,
-      orderBy: { createdAt: "desc" },
-      include: {
-        _count: {
-          select: { applications: true },
+  let jobs: any[] = [];
+  let categories: { category: string }[] = [];
+  let totalJobsCount = 0;
+
+  try {
+    const res = await Promise.all([
+      prisma.job.findMany({
+        where: whereClause,
+        orderBy: { createdAt: "desc" },
+        include: {
+          _count: {
+            select: { applications: true },
+          },
         },
-      },
-    }),
-    prisma.job.findMany({
-      where: { isOpen: true },
-      select: { category: true },
-      distinct: ["category"],
-    }),
-    prisma.job.count({ where: { isOpen: true } }),
-  ]);
+      }),
+      prisma.job.findMany({
+        where: { isOpen: true },
+        select: { category: true },
+        distinct: ["category"],
+      }),
+      prisma.job.count({ where: { isOpen: true } }),
+    ]);
+    jobs = res[0];
+    categories = res[1];
+    totalJobsCount = res[2];
+  } catch (err) {
+    console.error("HomePage DB Query Error:", err);
+  }
 
   return (
     <div suppressHydrationWarning className="flex min-h-screen flex-col bg-[#030303]">
