@@ -42,31 +42,48 @@ export async function getOpenJobs(category?: string, searchKeyword?: string) {
     jobs = res[0];
     categories = res[1];
     totalJobsCount = res[2];
-    return { jobs, categories, totalJobsCount };
+    if (jobs.length > 0) {
+      return { jobs, categories, totalJobsCount };
+    }
   } catch (err) {
     console.warn("Prisma DB Query failed, falling back to Supabase REST SDK:", err);
-    try {
-      let query = supabaseAdmin.from("Job").select("*, Application(count)").eq("isOpen", true);
+  }
+
+  // Fallback ke Supabase REST SDK (100% HTTPS Native)
+  try {
+    const [jobsRes, appsRes] = await Promise.all([
+      supabaseAdmin.from("Job").select("*").eq("isOpen", true).order("createdAt", { ascending: false }),
+      supabaseAdmin.from("Application").select("id, jobId"),
+    ]);
+
+    if (jobsRes.data && jobsRes.data.length > 0) {
+      let filtered = jobsRes.data;
       if (category) {
-        query = query.eq("category", category);
+        filtered = filtered.filter((j: any) => j.category === category);
       }
       if (searchKeyword) {
-        query = query.or(`title.ilike.%${searchKeyword}%,description.ilike.%${searchKeyword}%`);
+        const kw = searchKeyword.toLowerCase();
+        filtered = filtered.filter(
+          (j: any) =>
+            j.title?.toLowerCase().includes(kw) || j.description?.toLowerCase().includes(kw)
+        );
       }
-      const { data: dbJobs } = await query.order("createdAt", { ascending: false });
 
-      if (dbJobs) {
-        jobs = dbJobs.map((j: any) => ({
-          ...j,
-          _count: { applications: Array.isArray(j.Application) ? (j.Application[0]?.count ?? 0) : 0 },
-        }));
-        totalJobsCount = jobs.length;
-        const cats = Array.from(new Set(jobs.map((j: any) => j.category)));
-        categories = cats.map((c: string) => ({ category: c }));
-      }
-    } catch (sbErr) {
-      console.error("Supabase REST Fallback Error in getOpenJobs:", sbErr);
+      const appCounts: Record<string, number> = {};
+      (appsRes.data || []).forEach((a: any) => {
+        appCounts[a.jobId] = (appCounts[a.jobId] || 0) + 1;
+      });
+
+      jobs = filtered.map((j: any) => ({
+        ...j,
+        _count: { applications: appCounts[j.id] || 0 },
+      }));
+      totalJobsCount = jobs.length;
+      const cats = Array.from(new Set(jobsRes.data.map((j: any) => j.category)));
+      categories = cats.map((c: any) => ({ category: c }));
     }
+  } catch (sbErr) {
+    console.error("Supabase REST Fallback Error in getOpenJobs:", sbErr);
   }
 
   return { jobs, categories, totalJobsCount };
@@ -92,16 +109,16 @@ export async function getJobBySlug(slug: string) {
   }
 
   try {
-    const { data: dbJob } = await supabaseAdmin
-      .from("Job")
-      .select("*, Application(count)")
-      .eq("slug", slug)
-      .maybeSingle();
+    const [jobRes, appsRes] = await Promise.all([
+      supabaseAdmin.from("Job").select("*").eq("slug", slug).maybeSingle(),
+      supabaseAdmin.from("Application").select("id, jobId"),
+    ]);
 
-    if (dbJob) {
+    if (jobRes.data) {
+      const appCount = (appsRes.data || []).filter((a: any) => a.jobId === jobRes.data.id).length;
       job = {
-        ...dbJob,
-        _count: { applications: Array.isArray(dbJob.Application) ? (dbJob.Application[0]?.count ?? 0) : 0 },
+        ...jobRes.data,
+        _count: { applications: appCount },
       };
     }
   } catch (sbErr) {
