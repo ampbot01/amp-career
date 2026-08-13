@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* AMP Design System — dark-first, forced dark. Source: design.md */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-amp-blue: #2266f1;
+  --color-amp-blue-light: #3b82f6;
+  --color-amp-blue-deep: #1d4ed8;
+  --color-amp-purple: #8350e8;
+
+  --font-heading: var(--font-space-grotesk), sans-serif;
+  --font-body: var(--font-inter), sans-serif;
+}
+
+:root {
+  --background: #030303;
+  --card: #0a0a0a;
+  --border: #262626;
+  --foreground: #fafafa;
+  --muted-foreground: #a3a3a3;
+  --radius: 0.625rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+/* Effects from design.md */
+.bg-hero-glow {
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34, 102, 241, 0.18), transparent 55%);
+}
+
+.bg-btn-gradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+}
+
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Muted scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
