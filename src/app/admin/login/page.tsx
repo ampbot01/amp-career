@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { LoginForm } from "@/components/admin/login-form";
 
 export const metadata = { title: "Admin Login — AMP Careers" };
@@ -10,7 +11,9 @@ export default function LoginPage() {
         <p className="mb-6 text-sm text-muted-foreground">
           Masuk untuk mengelola lowongan dan lamaran.
         </p>
-        <LoginForm />
+        <Suspense>
+          <LoginForm />
+        </Suspense>
       </div>
     </main>
   );
