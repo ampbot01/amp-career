@@ -1,16 +1,15 @@
 // Google reCAPTCHA server-side verification.
-// Menggunakan fail-safe handler agar kesalahan domain / sitekey Google tidak memblokir pelamar asli.
 
 export async function verifyRecaptcha(token: string | undefined, ip?: string): Promise<boolean> {
   const secret = process.env.RECAPTCHA_SECRET_KEY;
   if (!secret) {
-    return true; // dev / fallback bypass jika secret belum diset
-  }
-  if (!token) return false;
-  if (token === "bypassed-invalid-domain") {
-    console.warn("reCAPTCHA bypassed due to invalid domain or site key configuration.");
+    if (process.env.NODE_ENV === "production") {
+      console.error("RECAPTCHA_SECRET_KEY belum diset di production!");
+      return false;
+    }
     return true;
   }
+  if (!token) return false;
 
   const params = new URLSearchParams({
     secret,
@@ -26,13 +25,11 @@ export async function verifyRecaptcha(token: string | undefined, ip?: string): P
     });
     const data = (await res.json()) as { success: boolean; "error-codes"?: string[] };
     if (!data.success) {
-      console.warn("reCAPTCHA siteverify returned error codes:", data["error-codes"]);
-      // Jika terjadi kesalahan konfigurasi domain/sitekey di Google Console, jangan blokir pelamar
-      return true;
+      console.warn("reCAPTCHA siteverify verification failed:", data["error-codes"]);
     }
     return data.success;
   } catch (err) {
     console.error("Error verifying reCAPTCHA:", err);
-    return true;
+    return false;
   }
 }

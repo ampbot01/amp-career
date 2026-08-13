@@ -90,7 +90,10 @@ export function ApplyForm({ jobId, jobTitle }: Props) {
       setError("Ukuran file maksimal 5MB.");
       return;
     }
-    const effectiveCaptchaToken = captchaToken || "bypassed-invalid-domain";
+    if (needsCaptcha && !captchaToken) {
+      setError("Selesaikan verifikasi anti-spam (centang Captcha) terlebih dahulu.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -121,8 +124,8 @@ export function ApplyForm({ jobId, jobTitle }: Props) {
         body: JSON.stringify({
           jobId,
           resumePath: path,
-          recaptchaToken: effectiveCaptchaToken,
-          turnstileToken: effectiveCaptchaToken,
+          recaptchaToken: captchaToken,
+          turnstileToken: captchaToken,
           fullName: form.get("fullName"),
           email: form.get("email"),
           phone: form.get("phone"),
