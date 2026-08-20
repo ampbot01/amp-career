@@ -76,7 +76,7 @@ export function AdminAiModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold transition hover:scale-105 ${colorStyle.border} ${colorStyle.bg} ${colorStyle.text}`}
+        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold transition hover:scale-105 active:scale-95 ${colorStyle.border} ${colorStyle.bg} ${colorStyle.text}`}
         title="Klik untuk melihat detail analisis ATS AI"
       >
         <Sparkles className="h-3 w-3 shrink-0 animate-pulse" />
@@ -85,20 +85,20 @@ export function AdminAiModal({
 
       {/* AI Analysis Dialog Modal */}
       {open && (
-        <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-in fade-in">
-          <div className="w-full max-w-xl rounded-3xl border border-white/15 bg-[#0e0e0e] p-6 shadow-2xl space-y-5 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/80 p-3 sm:p-4 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-xl rounded-2xl sm:rounded-3xl border border-white/15 bg-[#0e0e0e] p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-white/[0.08] pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 shrink-0">
-                  <Brain className="h-5 w-5" />
+            <div className="flex items-start justify-between border-b border-white/[0.08] pb-3 sm:pb-4">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="flex h-9 sm:h-10 w-9 sm:w-10 items-center justify-center rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 shrink-0">
+                  <Brain className="h-4 sm:h-5 w-4 sm:w-5" />
                 </div>
                 <div>
-                  <h3 className="font-heading text-lg font-bold text-white">
+                  <h3 className="font-heading text-base sm:text-lg font-bold text-white">
                     Hasil Analisis ATS AI
                   </h3>
-                  <p className="text-xs text-neutral-400">
-                    Evaluasi kesesuaian berkas {fullName} untuk posisi {jobTitle}
+                  <p className="text-[11px] sm:text-xs text-neutral-400">
+                    Evaluasi berkas <span className="text-neutral-200 font-semibold">{fullName}</span> untuk posisi <span className="text-neutral-200 font-semibold">{jobTitle}</span>
                   </p>
                 </div>
               </div>
@@ -113,19 +113,19 @@ export function AdminAiModal({
             </div>
 
             {/* Score Banner Gauge */}
-            <div className={`rounded-2xl border p-5 space-y-3 ${colorStyle.border} ${colorStyle.bg}`}>
-              <div className="flex items-center justify-between">
+            <div className={`rounded-2xl border p-4 sm:p-5 space-y-2.5 sm:space-y-3 ${colorStyle.border} ${colorStyle.bg}`}>
+              <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-1">
                 <div className="flex items-center gap-2">
-                  <Award className={`h-5 w-5 ${colorStyle.text}`} />
-                  <span className="font-heading text-sm font-bold text-white">Skor Kesesuaian ATS</span>
+                  <Award className={`h-4 sm:h-5 w-4 sm:w-5 ${colorStyle.text}`} />
+                  <span className="font-heading text-xs sm:text-sm font-bold text-white">Skor Kesesuaian ATS</span>
                 </div>
-                <span className={`font-heading text-2xl font-extrabold ${colorStyle.text}`}>
+                <span className={`font-heading text-xl sm:text-2xl font-extrabold ${colorStyle.text}`}>
                   {score}% — {badgeText}
                 </span>
               </div>
 
               {/* Progress Bar */}
-              <div className="h-2.5 w-full rounded-full bg-white/10 overflow-hidden">
+              <div className="h-2 sm:h-2.5 w-full rounded-full bg-white/10 overflow-hidden">
                 <div
                   className={`h-full transition-all duration-500 ${colorStyle.bar}`}
                   style={{ width: `${score}%` }}
@@ -141,7 +141,7 @@ export function AdminAiModal({
             {activeAnalysis?.strengths && activeAnalysis.strengths.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4" />
+                  <CheckCircle2 className="h-3.5 w-3.5" />
                   <span>Kelebihan Utama Kandidat</span>
                 </h4>
                 <div className="space-y-1.5">
@@ -162,7 +162,7 @@ export function AdminAiModal({
             {activeAnalysis?.gaps && activeAnalysis.gaps.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTriangle className="h-3.5 w-3.5" />
                   <span>Area Perhatian & Skill Gaps</span>
                 </h4>
                 <div className="space-y-1.5">
@@ -181,7 +181,7 @@ export function AdminAiModal({
 
             {/* Recommendation Box */}
             {activeAnalysis?.recommendation && (
-              <div className="rounded-2xl border border-blue-500/30 bg-blue-950/20 p-4 space-y-1.5">
+              <div className="rounded-2xl border border-blue-500/30 bg-blue-950/20 p-3.5 sm:p-4 space-y-1.5">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-blue-300">
                   <TrendingUp className="h-4 w-4 text-blue-400" />
                   <span>Rekomendasi Rekrutmen</span>
@@ -193,13 +193,21 @@ export function AdminAiModal({
             )}
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-between border-t border-white/[0.08] pt-4">
+            <div className="flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-between gap-2 border-t border-white/[0.08] pt-3 sm:pt-4">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs font-semibold text-neutral-300 hover:bg-white/[0.08] hover:text-white transition text-center"
+              >
+                Tutup
+              </button>
+
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   disabled={isPending}
                   onClick={handleRunAnalysis}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-xs font-semibold text-purple-300 hover:bg-purple-500/20 transition disabled:opacity-50"
+                  className="w-full xs:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-4 py-2.5 text-xs font-semibold text-purple-300 hover:bg-purple-500/20 active:scale-95 transition disabled:opacity-50"
                 >
                   {isPending ? (
                     <>
@@ -209,24 +217,16 @@ export function AdminAiModal({
                   ) : (
                     <>
                       <RefreshCw className="h-3.5 w-3.5 text-purple-400" />
-                      <span>Jalankan Ulang AI ATS</span>
+                      <span>Jalankan Ulang AI</span>
                     </>
                   )}
                 </button>
                 {successMsg && (
-                  <span className="text-[11px] font-semibold text-emerald-400 animate-in fade-in">
+                  <span className="text-[10px] font-semibold text-emerald-400 animate-in fade-in shrink-0">
                     ✓ {successMsg}
                   </span>
                 )}
               </div>
-
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-neutral-300 hover:bg-white/[0.08] hover:text-white transition"
-              >
-                Tutup
-              </button>
             </div>
           </div>
         </div>
